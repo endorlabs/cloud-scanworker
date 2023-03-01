@@ -20,7 +20,7 @@ A Python3 module and command-line tool that acquires GitHub and Endor Labs crede
 4. Create an EC2 instance with an official Ubuntu 22.04 LTS (Jammy Jellyfish) AMI for your region (you can find [a searchable list on ubuntu.com](https://cloud-images.ubuntu.com/locator/ec2/)):
     1. An IAM Policy that allows describing the instance (`AmazonEC2ReadOnlyAccess` works well) and access to the ARN of `EndorLabs_ScanWorkerAuth`
     2. A tag named `EndorLabs_SecretName`, with the value `EndorLabs_ScanWorkerAuth`
-    3. User data containing the contents of [`ubuntu_setup.bash`]
+    3. User data containing the contents of [`ubuntu_setup.bash`](ubuntu_setup.bash)
         * **NOTE:** make appropriate modifications for your environment; the EC2 instance should be able to build your target packages for best results
 5. Launch the instance -- after launch is complete, it will begin installing requirements and automatically scanning your supported repos
 
