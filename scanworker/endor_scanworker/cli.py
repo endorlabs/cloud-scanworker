@@ -44,7 +44,11 @@ def process_args():
     parser.add_argument('--gh', type=Path, default='./gh')
     parser.add_argument('--endorctl', type=Path, default='./endorctl')
     parser.add_argument('--results', type=Path)
-    parser.add_argument('--debug', action='store_true', default=os.getenv('ENDOR_DEBUG', False))
+    
+    # hidden configs
+    parser.add_argument('--debug', action='store_true', default=os.getenv('ENDOR_DEBUG', False), help=argparse.SUPPRESS)
+    parser.add_argument('--scm', default='github', help=argparse.SUPPRESS)
+
 
     args = parser.parse_args()
     args.lang = languages if args.lang is None else args.lang
@@ -123,12 +127,16 @@ def _main():
             sdterr(f"Skipping {project['nameWithOwner']} because I've already seen it")
             continue
 
+        scan_options = {}
+        if config.scm == 'github':
+            scan_options['enable'] = 'github,git,analytics'
+
         seen_project[project['url']] = True
         try:
             stderr(f"Clone {project['nameWithOwner']}")
             gh.clone(project['nameWithOwner'])
             stderr(f"-> SCANNING {project['name']}")
-            results = ec.scan(path=project['name'])
+            results = ec.scan(path=project['name'], **scan_options)
 
             file_base = f"{project['nameWithOwner'].replace('/','_')}"
         
