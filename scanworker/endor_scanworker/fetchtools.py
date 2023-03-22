@@ -61,7 +61,7 @@ def fetch_exe(url, write_dir, unpack_member=None, filename=None):
     os.chmod(os.path.join(write_dir, filename), stat.S_IRWXU | stat.S_IROTH | stat.S_IXOTH)
 
 
-def fetch_gh(write_dir='.', version='2.23.0', osname=None, archname=None):
+def fetch_gh(write_dir='.', version='2.25.1', osname=None, archname=None):
     osname = get_os() if osname is None else osname
     archname = get_arch() if archname is None else archname
 
