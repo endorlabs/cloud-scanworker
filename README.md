@@ -8,6 +8,14 @@
 
 A Python3 module and command-line tool that acquires GitHub and Endor Labs credentials from AWS Secrets Manager in order to scan all supported repos in your GitHub organization.
 
+## Limitations
+
+Because this script does not attempt to build the repositories, the scans here may have some limitations:
+
+* reachability analysis may not be possible for many repos
+* increased possibility of unresolved or missing packages (since it must rely on manifests rather than "in vivo" analysis)
+* custom findings policy rules that require artifact analysis may not run/produce findings
+
 ## Installation
 
 1. Generate API keys:
