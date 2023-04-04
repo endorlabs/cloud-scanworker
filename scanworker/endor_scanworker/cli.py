@@ -66,6 +66,10 @@ def _main():
     config = process_args()
     # from pprint import pprint,pformat
     # stderr(pformat(config))
+    if config.results:
+        stderr(f"Saving results in {config.results}")
+    if config.debug:
+        stderr(f"Operating in debug mode")
 
     if config.aws_secret_name is None:
         try:
@@ -122,6 +126,7 @@ def _main():
     # SCAN projects
     seen_project = {}
     interrupted = False
+    logpath = config.results if config.results is not None else os.getenv('HOME')
     for project in repo_list:
         if project['url'] in seen_project:
             sdterr(f"Skipping {project['nameWithOwner']} because I've already seen it")
@@ -133,12 +138,11 @@ def _main():
 
         seen_project[project['url']] = True
         try:
+            file_base = f"{project['nameWithOwner'].replace('/','_')}"
             stderr(f"Clone {project['nameWithOwner']}")
             gh.clone(project['nameWithOwner'])
             stderr(f"-> SCANNING {project['name']}")
             results = ec.scan(path=project['name'], **scan_options)
-
-            file_base = f"{project['nameWithOwner'].replace('/','_')}"
         
             if config.results is not None:
                 results_file = os.path.join(config.results, f"{file_base}.json")
@@ -147,14 +151,19 @@ def _main():
                     jsonfile.write(results.stdout)
 
             if config.debug:
-                log_file = f"{file_base}.log"
+                log_file = os.path.join(logpath, f"{file_base}.log")
                 stderr(f"-> Writing '{log_file}'")
                 with open(log_file, 'w') as logfile:
                     logfile.write(results.stderr)
                     logfile.write(results.stdout)
 
         except CommandError as err:
+            errfile = os.path.join(logpath, f"{file_base}.err.log")
             stderr(f"Returned {err.returncode} from {err.cmd} while scanning {project['nameWithOwner']}")
+            stderr(f"-> Writing STDERR data to {errfile}")
+            with open(errfile, 'w') as logfile:
+                logfile.write(err.stderr)
+                logfile.write(err.stdout)
         except KeyboardInterrupt:
             stderr(">>> Interrupt requested, stopping application")
             interrupted = True
