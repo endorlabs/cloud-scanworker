@@ -42,8 +42,8 @@ class ServiceSecret(object):
 
 
 class AWSSecret(object):
-    def __init__(self, secret_id):
-        self._client = boto3.client(service_name='secretsmanager', region_name='us-east-2')
+    def __init__(self, secret_id, region='us-east-2'):
+        self._client = boto3.client(service_name='secretsmanager', region_name=region)
         self.endor = None
         self.github = None
         self.fetch_secret(secret_id)
@@ -62,6 +62,19 @@ class AWSSecret(object):
             response = r.read()
 
         return response
+
+    @staticmethod
+    def get_region(aws_token=None):
+        if aws_token is None:
+            aws_token = __class__.aws_api_token()
+
+        metadata_request = Request('http://169.254.169.254/latest/meta-data/placement/availability-zone', headers={'X-aws-ec2-metadata-token': aws_token})
+        with urlopen(metadata_request, timeout=8) as r:
+            response = r.read()
+
+        zonedata = response.decode('utf8')
+        region = zonedata[:-1]
+        return region
     
     @staticmethod
     def fetch_tag(*taglist):
@@ -74,12 +87,7 @@ class AWSSecret(object):
 
         instance_id = response.decode('utf8')
 
-        metadata_request = Request('http://169.254.169.254/latest/meta-data/placement/availability-zone', headers={'X-aws-ec2-metadata-token': aws_token})
-        with urlopen(metadata_request, timeout=8) as r:
-            response = r.read()
-
-        zonedata = response.decode('utf8')
-        region = zonedata[:-1]
+        region = __class__.get_region(aws_token)
 
         # print(f"Zone: {zonedata}, Region: {region}")
 

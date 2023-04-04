@@ -82,7 +82,7 @@ def _main():
             if config.debug:
                 raise(err)
             sys.exit(ERROR.AWS_ERROR)
-    secrets = AWSSecret(config.aws_secret_name)
+    secrets = AWSSecret(config.aws_secret_name, region=AWSSecret.get_region())
 
     # Fetch tools if not found
     if not Path(config.gh).is_file():
